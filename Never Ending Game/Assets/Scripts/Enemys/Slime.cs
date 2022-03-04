@@ -8,13 +8,21 @@ public class Slime : MonoBehaviour
     [HideInInspector]
     public bool mustPatrol;
     private bool mustTurn;
+    private float distToPlayer;
+    
 
     [Header("Slime settings")]
     public Rigidbody2D rb;
     public float walkSpeed;
     public float range;
+    public float slimeBallSpeed;
+    public float TimeBTWSlimeballs;
     public Transform groundCheckPos;
+    public Transform slimeBallPos;
     public LayerMask groundLayer;
+    public Collider2D bodyCollider;
+    public Transform player;
+    public GameObject slimeBall;
     void Start()
     {
         mustPatrol = true;
@@ -35,11 +43,28 @@ public class Slime : MonoBehaviour
             //Checks for ground
             mustTurn = !Physics2D.OverlapCircle(groundCheckPos.position, 0.1f, groundLayer);
         }
+
+        distToPlayer = Vector2.Distance(transform.position, player.position);
+        if(distToPlayer <= range)
+        {
+            if(player.position.x > transform.position.x && transform.localScale.x < 0 
+                || player.position.x < transform.position.x && transform.localScale.x > 0)
+            {
+                mustPatrol=false;
+                rb.velocity = Vector2.zero;
+                Shoot();
+            }
+            else
+            {
+                mustPatrol = true;
+            }
+            
+        }
     }
 
     void Patrol()
     {
-        if (mustTurn)
+        if (mustTurn || bodyCollider.IsTouchingLayers(groundLayer))
         {
             Flip();
         }
@@ -56,8 +81,13 @@ public class Slime : MonoBehaviour
         mustPatrol = true;
     }
 
-    void Shoot()
+    IEnumerator Shoot()
     {
+        //Shoot
+        yield return new WaitForSeconds(TimeBTWSlimeballs);
+        GameObject newSlimeBall = Instantiate(slimeBall, slimeBallPos.position, Quaternion.identity);
+
+        newSlimeBall.GetComponent<Rigidbody2D>().velocity = new Vector2(slimeBallSpeed * walkSpeed * Time.fixedDeltaTime, 0f);
 
     }
 }
