@@ -4,35 +4,30 @@ using UnityEngine;
 
 public class SlimeBall : MonoBehaviour
 {
-    public float dieTime;
-    //public float damage;
-    public GameObject ball;
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(CountDownToDeath());
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    private void OnCollisionEnter2D(Collision2D col)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        Death();
-    }
-
-    IEnumerator CountDownToDeath()
-    {
-        yield return new WaitForSeconds(dieTime);
-
-        Death();
-    }
-
-    void Death()
-    {
-        Destroy (gameObject);
+        var player = collision.collider.GetComponent<Player_Behevaior_Test>();
+        var slime = collision.collider.GetComponent<Slime>();
+        if (player)
+        {
+            player.TakeHit(2);
+        }
+        else if (slime)
+        {
+            slime.TakeHit(2);
+        }
+        //Destroy(gameObject);
     }
 }

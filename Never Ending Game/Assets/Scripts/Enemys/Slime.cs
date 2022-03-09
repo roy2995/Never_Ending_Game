@@ -4,28 +4,32 @@ using UnityEngine;
 
 public class Slime : MonoBehaviour
 {
-    [Header("Private settings")]
+    [Header("private settings")]
     [HideInInspector]
     public bool mustPatrol;
     private bool mustTurn;
-    private float distToPlayer;
-    
 
     [Header("Slime settings")]
     public Rigidbody2D rb;
     public float walkSpeed;
     public float range;
+    public float fireRate = 3;
+    public float nextFireTime;
+    public float timeBTWBalls;
     public float slimeBallSpeed;
-    public float TimeBTWSlimeballs;
+    private float distToPlayer;
+    public float healthPoints;
+    public float maxHealthPoints = 10;
     public Transform groundCheckPos;
-    public Transform slimeBallPos;
     public LayerMask groundLayer;
-    public Collider2D bodyCollider;
-    public Transform player;
+    public Collider2D bodycollider;
+    public Transform player, ballPOS;
     public GameObject slimeBall;
     void Start()
     {
+        healthPoints = maxHealthPoints;
         mustPatrol = true;
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
     void Update()
@@ -33,6 +37,26 @@ public class Slime : MonoBehaviour
         if (mustPatrol)
         {
             Patrol();
+        }
+
+        distToPlayer = Vector2.Distance(transform.position, player.position);
+
+        if (distToPlayer < range && nextFireTime < Time.time)
+        {
+            if (player.position.x > transform.position.x && transform.localScale.x < 0
+                || player.position.x < transform.position.x && transform.localScale.x > 0)
+            {
+                Flip();
+            }
+
+            mustPatrol = false;
+            rb.velocity = Vector2.zero;
+            Shoot();
+            //StartCoroutine(Shoot());
+        }
+        else
+        {
+            mustPatrol = true;
         }
     }
 
@@ -43,28 +67,11 @@ public class Slime : MonoBehaviour
             //Checks for ground
             mustTurn = !Physics2D.OverlapCircle(groundCheckPos.position, 0.1f, groundLayer);
         }
-
-        distToPlayer = Vector2.Distance(transform.position, player.position);
-        if(distToPlayer <= range)
-        {
-            if(player.position.x > transform.position.x && transform.localScale.x < 0 
-                || player.position.x < transform.position.x && transform.localScale.x > 0)
-            {
-                mustPatrol=false;
-                rb.velocity = Vector2.zero;
-                Shoot();
-            }
-            else
-            {
-                mustPatrol = true;
-            }
-            
-        }
     }
 
     void Patrol()
     {
-        if (mustTurn || bodyCollider.IsTouchingLayers(groundLayer))
+        if (mustTurn)
         {
             Flip();
         }
@@ -81,13 +88,32 @@ public class Slime : MonoBehaviour
         mustPatrol = true;
     }
 
-    IEnumerator Shoot()
+    void Shoot()
     {
-        //Shoot
-        yield return new WaitForSeconds(TimeBTWSlimeballs);
-        GameObject newSlimeBall = Instantiate(slimeBall, slimeBallPos.position, Quaternion.identity);
+        //yield return new WaitForSeconds(timeBTWBalls);
+        GameObject newSlimeBall = Instantiate(slimeBall, ballPOS.position, Quaternion.identity);
 
-        newSlimeBall.GetComponent<Rigidbody2D>().velocity = new Vector2(slimeBallSpeed * walkSpeed * Time.fixedDeltaTime, 0f);
+        newSlimeBall.GetComponent<Rigidbody>().velocity = new Vector2(slimeBallSpeed * walkSpeed * Time.fixedDeltaTime, 0f);
+        nextFireTime = Time.time + fireRate;
+        GameObject.Destroy(newSlimeBall.gameObject, 3f);
+
+
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, range);
+    }
+
+    public void TakeHit(float damage)
+    {
+        healthPoints -= damage;
+        if (healthPoints < 0)
+        {
+            Destroy(gameObject);
+        }
+
 
     }
 }
