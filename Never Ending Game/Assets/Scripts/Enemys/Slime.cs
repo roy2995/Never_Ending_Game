@@ -8,23 +8,25 @@ public class Slime : MonoBehaviour
     [HideInInspector]
     public bool mustPatrol;
     private bool mustTurn;
+    private float healthPoints;
+    private float nextFireTime;
+    private float nextMove;
+
+
 
     [Header("Slime settings")]
     public Rigidbody2D rb;
     public float walkSpeed;
     public float range;
-    public float fireRate = 3;
-    public float nextFireTime;
-    public float timeBTWBalls;
-    public float slimeBallSpeed;
-    private float distToPlayer;
-    public float healthPoints;
+    public float fireRate = 1;
+    public float moverate = 3;
+    public float distToPlayer;
     public float maxHealthPoints = 10;
     public Transform groundCheckPos;
     public LayerMask groundLayer;
     public Collider2D bodycollider;
     public Transform player, ballPOS;
-    public GameObject slimeBall;
+    public SlimeBall slimeBall;
     void Start()
     {
         healthPoints = maxHealthPoints;
@@ -39,9 +41,11 @@ public class Slime : MonoBehaviour
             Patrol();
         }
 
+        if(player != null)
+        { 
         distToPlayer = Vector2.Distance(transform.position, player.position);
 
-        if (distToPlayer < range && nextFireTime < Time.time)
+        if (distToPlayer < range)
         {
             if (player.position.x > transform.position.x && transform.localScale.x < 0
                 || player.position.x < transform.position.x && transform.localScale.x > 0)
@@ -51,8 +55,19 @@ public class Slime : MonoBehaviour
 
             mustPatrol = false;
             rb.velocity = Vector2.zero;
-            Shoot();
+            if (nextFireTime < Time.time)
+            {
+                Shoot();
+                nextFireTime = Time.time + fireRate;
+                //Debug.Log(nextFireTime);
+            }
             //StartCoroutine(Shoot());
+        }
+        else
+        {
+            mustPatrol = true;
+        }
+
         }
         else
         {
@@ -76,7 +91,13 @@ public class Slime : MonoBehaviour
             Flip();
         }
         //moves slime
-        rb.velocity = new Vector2(walkSpeed * Time.fixedDeltaTime, rb.velocity.y);
+        if(nextMove < Time.time)
+        {
+            rb.velocity = new Vector2(walkSpeed * Time.fixedDeltaTime, rb.velocity.y);
+            nextMove = Time.time + moverate;
+
+        }
+        
     }
 
     void Flip()
@@ -91,11 +112,14 @@ public class Slime : MonoBehaviour
     void Shoot()
     {
         //yield return new WaitForSeconds(timeBTWBalls);
-        GameObject newSlimeBall = Instantiate(slimeBall, ballPOS.position, Quaternion.identity);
+        //GameObject newSlimeBall = Instantiate(slimeBall, ballPOS.position, Quaternion.identity);
 
-        newSlimeBall.GetComponent<Rigidbody>().velocity = new Vector2(slimeBallSpeed * walkSpeed * Time.fixedDeltaTime, 0f);
-        nextFireTime = Time.time + fireRate;
-        GameObject.Destroy(newSlimeBall.gameObject, 3f);
+       
+            Instantiate(slimeBall, ballPOS.position, ballPOS.rotation).moveDir = new Vector2(transform.localScale.x, 0f);
+            //newSlimeBall.GetComponent<Rigidbody>().velocity = new Vector2(slimeBallSpeed * walkSpeed * Time.fixedDeltaTime, 0f);
+        
+        
+        //GameObject.Destroy(newSlimeBall.gameObject, 3f);
 
 
     }
@@ -104,13 +128,15 @@ public class Slime : MonoBehaviour
     {
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, range);
+        Gizmos.DrawWireSphere(transform.position, distToPlayer);
     }
 
     public void TakeHit(float damage)
     {
         healthPoints -= damage;
-        if (healthPoints < 0)
+        if (healthPoints <= 0)
         {
+            Debug.Log("Slime died");
             Destroy(gameObject);
         }
 

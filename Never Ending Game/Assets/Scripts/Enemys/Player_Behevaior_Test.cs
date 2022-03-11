@@ -21,7 +21,8 @@ public class Player_Behevaior_Test : MonoBehaviour
     public void TakeHit(float damage)
     {
         healthPoints -= damage;
-        if (healthPoints < 0)
+        Debug.Log("Player Health: " + healthPoints + " minus -" + damage);
+        if (healthPoints == 0)
         {
             Destroy(gameObject);
         }

@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class SlimeBall : MonoBehaviour
 {
+    public float bulletSpeed;
+    public Rigidbody2D rb;
+    public Vector2 moveDir;
     // Start is called before the first frame update
     void Start()
     {
@@ -13,21 +16,36 @@ public class SlimeBall : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        rb.velocity = moveDir * bulletSpeed;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        var player = collision.collider.GetComponent<Player_Behevaior_Test>();
-        var slime = collision.collider.GetComponent<Slime>();
-        if (player)
-        {
+            
+            var player = collision.GetComponent<Player_Behevaior_Test>();
             player.TakeHit(2);
-        }
-        else if (slime)
-        {
-            slime.TakeHit(2);
-        }
-        //Destroy(gameObject);
+            //var slime = collision.GetComponent<Slime>();
+            //slime.TakeHit(2);
+
+        Destroy(gameObject);
+    }
+
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    var player = collision.collider.GetComponent<Player_Behevaior_Test>();
+    //    var slime = collision.collider.GetComponent<Slime>();
+    //    if (player)
+    //    {
+    //        player.TakeHit(2);
+    //    }
+    //    else if (slime)
+    //    {
+    //        slime.TakeHit(2);
+    //    }
+    //    Destroy(gameObject);
+    //}
+    private void OnBecameInvisible()
+    {
+        Destroy(gameObject);
     }
 }
