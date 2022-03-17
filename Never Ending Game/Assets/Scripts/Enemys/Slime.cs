@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Slime : MonoBehaviour
 {
-    [Header("private settings")]
+    [Header("private Settings")]
     [HideInInspector]
     public bool mustPatrol;
     private bool mustTurn;
@@ -12,21 +12,27 @@ public class Slime : MonoBehaviour
     private float nextFireTime;
     private float nextMove;
 
-
-
-    [Header("Slime settings")]
+    [Header("Slime Movement")]
+    [Range(100, 500)] public float walkSpeed;
+    [Range(0.1f, 2)] public float moverate;
     public Rigidbody2D rb;
-    public float walkSpeed;
-    public float range;
-    public float fireRate = 1;
-    public float moverate = 3;
-    public float distToPlayer;
-    public float maxHealthPoints = 10;
     public Transform groundCheckPos;
-    public LayerMask groundLayer;
     public Collider2D bodycollider;
+    public LayerMask groundLayer;
+
+
+    [Header("Slime Attack Settings")]
+    [Range(3, 10f)]public float range;
+    [Range(0.1f, 1f)] public float fireRate;
+    [Range(2, 10)] public float distToPlayer;
     public Transform player, ballPOS;
     public SlimeBall slimeBall;
+
+    [Header("Slime Health Settings")]
+    [Range(1, 50)] public float maxHealthPoints = 10;
+
+
+    
     void Start()
     {
         healthPoints = maxHealthPoints;
@@ -59,9 +65,7 @@ public class Slime : MonoBehaviour
             {
                 Shoot();
                 nextFireTime = Time.time + fireRate;
-                //Debug.Log(nextFireTime);
             }
-            //StartCoroutine(Shoot());
         }
         else
         {
@@ -79,7 +83,7 @@ public class Slime : MonoBehaviour
     {
         if (mustPatrol)
         {
-            //Checks for ground
+            //Checks for ground. When no ground is present on groundCheckPOS mustTurn will be true.
             mustTurn = !Physics2D.OverlapCircle(groundCheckPos.position, 0.1f, groundLayer);
         }
     }
@@ -111,22 +115,15 @@ public class Slime : MonoBehaviour
 
     void Shoot()
     {
-        //yield return new WaitForSeconds(timeBTWBalls);
-        //GameObject newSlimeBall = Instantiate(slimeBall, ballPOS.position, Quaternion.identity);
-
-       
+            //Spawn slime ball projectile
             Instantiate(slimeBall, ballPOS.position, ballPOS.rotation).moveDir = new Vector2(transform.localScale.x, 0f);
-            //newSlimeBall.GetComponent<Rigidbody>().velocity = new Vector2(slimeBallSpeed * walkSpeed * Time.fixedDeltaTime, 0f);
-        
-        
-        //GameObject.Destroy(newSlimeBall.gameObject, 3f);
-
-
     }
 
     private void OnDrawGizmosSelected()
     {
+        //Color
         Gizmos.color = Color.green;
+        //Displays sphere showing ranges in editor
         Gizmos.DrawWireSphere(transform.position, range);
         Gizmos.DrawWireSphere(transform.position, distToPlayer);
     }

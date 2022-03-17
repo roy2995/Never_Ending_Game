@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SlimeBall : MonoBehaviour
 {
-    public float bulletSpeed;
+    [Range(10, 50)] public float bulletSpeed;
     public Rigidbody2D rb;
     public Vector2 moveDir;
     // Start is called before the first frame update

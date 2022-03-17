@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Player_Behevaior_Test : MonoBehaviour
 {
-    public float healthPoints;
-    public float maxHealthPoints = 10;
+    private float healthPoints;
+    [Range(10, 500)] public float maxHealthPoints;
     // Start is called before the first frame update
     void Start()
     {
